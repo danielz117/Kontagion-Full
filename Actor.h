@@ -8,79 +8,137 @@
 class StudentWorld;
 class Actor: public GraphObject {
 public:
-	Actor(int imageID, double startX, double startY, Direction dir, int depth, StudentWorld* world);
+	Actor(int imageID, double startX, double startY, Direction dir, int depth, StudentWorld* world, bool damageable);
 	virtual void doSomething() = 0;
-	StudentWorld* getWorld();
+	StudentWorld* getWorld() const;
 	bool isAlive() const;
 	void setDead();
 	bool overlapOther(Actor* a) const;
+	bool isDamageable() const;
 private:
 	StudentWorld* m_world;
 	bool alive;
+	bool m_damageable;
 };
 
 class Socrates : public Actor
 {
 public:
-	Socrates(int imageID, double startX, double startY, Direction dir, int depth, StudentWorld* world);
+	Socrates(int imageID, double startX, double startY, Direction dir, int depth, StudentWorld* world, bool damageable);
 	void doSomething();
 	void setHealth(int num);
+	int getHealth() const;
 	void addFlame(int num);
-	void addLife();
+	int getSprays() const;
+	int getFlames() const;
+
 private:
 	int health;
 	int positionalAngle;
 	int flameCharges;
-	int lives;
+	int sprayCharges;
+	int waitSpray;
 };
 
 class Dirt : public Actor {
 public:
-	Dirt(int imageID, double startX, double startY, Direction dir, int depth, StudentWorld* world);
+	Dirt(int imageID, double startX, double startY, Direction dir, int depth, StudentWorld* world, bool damageable);
 	void doSomething();
 };
 
 class Food : public Actor {
 public:
-	Food(int imageID, double startX, double startY, Direction dir, int depth, StudentWorld* world);
+	Food(int imageID, double startX, double startY, Direction dir, int depth, StudentWorld* world, bool damageable);
 	void doSomething();
+};
+
+class Projectile : public Actor {
+public:
+	Projectile(int imageID, double startX, double startY, Direction dir, int depth, StudentWorld* world, bool damageable);
+	void doSomething();
+	virtual bool maxDistance(int num) = 0;
+private:
+	int travelDistance;
+};
+
+class Spray : public Projectile {
+public:
+	Spray(int imageID, double startX, double startY, Direction dir, int depth, StudentWorld* world, bool damageable);
+	bool maxDistance(int num);
+};
+
+class Flame :public Projectile {
+public:
+	Flame(int imageID, double startX, double startY, Direction dir, int depth, StudentWorld* world, bool damageable);
+	bool maxDistance(int num);
 };
 
 class Pit : public Actor {
 public:
-	Pit(int imageID, double startX, double startY, Direction dir, int depth, StudentWorld* world);
+	Pit(int imageID, double startX, double startY, Direction dir, int depth, StudentWorld* world, bool damageable);
 	void doSomething();
 };
 
 class powerUp : public Actor {
 public:
-	powerUp(int imageID, double startX, double startY, Direction dir, int depth, StudentWorld* world, int level, Socrates* player);
+	powerUp(int imageID, double startX, double startY, Direction dir, int depth, 
+		StudentWorld* world, Socrates* player, bool damageable);
 	void doSomething();
 	bool playerHit();
 	virtual void effect(Socrates* player) = 0;
 private:
 	Socrates* m_player;
 	int ticksAlive;
-	int level;
+	int maxTicks;
 };
 
 class healthGoodie : public powerUp {
 public:
-	healthGoodie(int imageID, double startX, double startY, Direction dir, int depth, StudentWorld* world, int level, Socrates* player);
+	healthGoodie(int imageID, double startX, double startY, Direction dir, int depth,
+		StudentWorld* world, Socrates* player, bool damageable);
 	void effect(Socrates* player);
 
 };
 
 class flameGoodie : public powerUp {
 public:
-	flameGoodie(int imageID, double startX, double startY, Direction dir, int depth, StudentWorld* world, int level, Socrates* player);
+	flameGoodie(int imageID, double startX, double startY, Direction dir, int depth, 
+		StudentWorld* world, Socrates* player, bool damageable);
 	void effect(Socrates* player);
 };
 
 class lifeGoodie : public powerUp {
 public:
-	lifeGoodie(int imageID, double startX, double startY, Direction dir, int depth, StudentWorld* world, int level, Socrates* player);
+	lifeGoodie(int imageID, double startX, double startY, Direction dir, int depth,
+		StudentWorld* world, Socrates* player, bool damageable);
 	void effect(Socrates* player);
+};
+
+class Fungus : public powerUp {
+public:
+	Fungus(int imageID, double startX, double startY, Direction dir, int depth,
+		StudentWorld* world, Socrates* player, bool damageable);
+	void effect(Socrates* player);
+};
+
+class Enemy : public Actor {
+public:
+	Enemy(int imageID, double startX, double startY, Direction dir, int depth, StudentWorld* world,
+		bool damageable, Socrates* player, int damage);
+	void doSomething();
+	virtual void duplicate(double x, double y) = 0;
+private:
+	int movePlanDistance;
+	int foodEaten;
+	Socrates* m_player;
+	int m_damage;
+};
+
+class RSalmonella : public Enemy {
+public:
+	RSalmonella(int imageID, double startX, double startY, Direction dir, int depth, StudentWorld* world,
+		bool damageable, Socrates* player, int damage);
+	void duplicate(double x, double y);
 };
 
 #endif // ACTOR_H_

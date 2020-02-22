@@ -20,7 +20,10 @@ public:
 	//bool blocked(Actor* a, Actor* b) const;
 	bool withinBound(double x, double y) const;
 	void validCoord(double &x, double &y, int size);
-	void addPoints(int num);
+	void addSpray(double startX, double startY, Direction dir);
+	void addFlame(double startX, double startY, Direction dir);
+	void addRSalmonella(double startX, double startY);
+	Actor* hitSomething(Projectile* p);
 
 private:
 	int points;
