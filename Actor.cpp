@@ -8,6 +8,11 @@ Actor::Actor(int imageID, double startX, double startY, Direction dir, int depth
 	m_world = world;
 	alive = true;
 	m_damageable = damageable;
+	hitPoints = 0;
+}
+
+Actor::~Actor() {
+
 }
 
 bool Actor::isAlive() const{
@@ -29,6 +34,10 @@ bool Actor::overlapOther(Actor* a) const {
 
 bool Actor::isDamageable() const {
 	return m_damageable;
+}
+
+bool Actor::takeDamage(int damage) {
+	hitPoints -= damage;
 }
 
 StudentWorld* Actor::getWorld() const{
@@ -144,7 +153,7 @@ Food::Food(int imageID, double startX, double startY, Direction dir, int depth, 
 void Food::doSomething() {
 
 }
-
+ //FLAME NEEDS SOME WORKKKKKKKKKKKKKKKK
 Projectile::Projectile(int imageID, double startX, double startY, Direction dir, int depth, StudentWorld* world, bool damageable)
 	: Actor(imageID, startX, startY, dir, depth, world, damageable) {
 	travelDistance = 0;

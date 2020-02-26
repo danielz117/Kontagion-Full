@@ -9,16 +9,19 @@ class StudentWorld;
 class Actor: public GraphObject {
 public:
 	Actor(int imageID, double startX, double startY, Direction dir, int depth, StudentWorld* world, bool damageable);
+	virtual ~Actor();
 	virtual void doSomething() = 0;
 	StudentWorld* getWorld() const;
 	bool isAlive() const;
 	void setDead();
 	bool overlapOther(Actor* a) const;
 	bool isDamageable() const;
+	virtual bool takeDamage(int damage);
 private:
 	StudentWorld* m_world;
 	bool alive;
 	bool m_damageable;
+	bool hitPoints;
 };
 
 class Socrates : public Actor

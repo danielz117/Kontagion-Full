@@ -18,8 +18,6 @@ public:
     virtual int move();
     virtual void cleanUp();
 	//bool blocked(Actor* a, Actor* b) const;
-	bool withinBound(double x, double y) const;
-	void validCoord(double &x, double &y, int size);
 	void addSpray(double startX, double startY, Direction dir);
 	void addFlame(double startX, double startY, Direction dir);
 	void addRSalmonella(double startX, double startY);
@@ -30,6 +28,8 @@ private:
 	int level;
 	Socrates* player;
 	vector<Actor*> stuff;
+	bool withinBound(double x, double y) const;
+	void validCoord(double& x, double& y, int size);
 };
 
 #endif // STUDENTWORLD_H_
