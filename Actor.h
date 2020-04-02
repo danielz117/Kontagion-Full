@@ -1,147 +1,222 @@
-#ifndef ACTOR_H_
-#define ACTOR_H_
+#ifndef ACTOR_INCLUDED
+#define ACTOR_INCLUDED
 
 #include "GraphObject.h"
 
-// Students:  Add code to this file, Actor.cpp, StudentWorld.h, and StudentWorld.cpp
-
 class StudentWorld;
-class Actor: public GraphObject {
-public:
-	Actor(int imageID, double startX, double startY, Direction dir, int depth, StudentWorld* world, bool damageable);
-	virtual ~Actor();
-	virtual void doSomething() = 0;
-	StudentWorld* getWorld() const;
-	bool isAlive() const;
-	void setDead();
-	bool overlapOther(Actor* a) const;
-	bool isDamageable() const;
-	virtual bool takeDamage(int damage);
-private:
-	StudentWorld* m_world;
-	bool alive;
-	bool m_damageable;
-	bool hitPoints;
-};
+class Socrates;
 
-class Socrates : public Actor
+class Actor : public GraphObject
 {
 public:
-	Socrates(int imageID, double startX, double startY, Direction dir, int depth, StudentWorld* world, bool damageable);
-	void doSomething();
-	void setHealth(int num);
-	int getHealth() const;
-	void addFlame(int num);
-	int getSprays() const;
-	int getFlames() const;
-
+	Actor(StudentWorld* w, int imageID, double x, double y, int dir, int depth);
+	virtual void doSomething() = 0;
+	bool isAlive() const;
+	void setDead();
+	StudentWorld* getWorld() const;
+	virtual bool takeDamage(int damage);
+	bool overlapOther(Actor* a) const;
+	bool movementOverlap(Actor* a) const;
+	virtual bool hasHitPoints() const;
+	virtual bool blocksBacteriumMovement() const;
+	virtual bool isEdible() const;
+	virtual bool preventsLevelCompleting() const;
 private:
-	int health;
+	bool alive;
+	StudentWorld* m_world;
+};
+
+class Dirt : public Actor
+{
+public:
+	Dirt(StudentWorld* w, double x, double y);
+	virtual void doSomething();
+	virtual bool takeDamage(int);
+	virtual bool blocksBacteriumMovement() const;
+};
+
+
+class Food : public Actor
+{
+public:
+	Food(StudentWorld* w, double x, double y);
+	virtual void doSomething();
+	virtual bool isEdible() const;
+};
+
+class Pit : public Actor
+{
+public:
+	Pit(StudentWorld* w, double x, double y);
+	virtual void doSomething();
+	virtual bool preventsLevelCompleting() const;
+private:
+	int numRSal;
+	int numASal;
+	int numEColi;
+};
+
+class Projectile : public Actor
+{
+public:
+	Projectile(StudentWorld* w, int imageID, double x, double y, int dir);
+	virtual void doSomething();
+	virtual int getMaxDist() = 0;
+	virtual int getDamage() = 0;
+private:
+	int travelDistance;
+};
+
+class Spray : public Projectile
+{
+public:
+	Spray(StudentWorld* w, double x, double y, int dir);
+	virtual int getMaxDist();
+	virtual int getDamage();
+};
+
+class Flame : public Projectile
+{
+public:
+	Flame(StudentWorld* w, double x, double y, int dir);
+	virtual int getMaxDist();
+	virtual int getDamage();
+};
+
+class Goodie : public Actor
+{
+public:
+	Goodie(StudentWorld* w, int imageID, double x, double y);
+	virtual bool takeDamage(int damage);
+	virtual void doSomething();
+	virtual bool notFungus() const;
+	virtual void pickUp(Socrates* s) = 0;
+private:
+	int ticksAlive;
+	int maxTicks;
+};
+
+class RestoreHealthGoodie : public Goodie
+{
+public:
+	RestoreHealthGoodie(StudentWorld* w, double x, double y);
+	virtual void pickUp(Socrates* s);
+
+};
+
+class FlamethrowerGoodie : public Goodie
+{
+public:
+	FlamethrowerGoodie(StudentWorld* w, double x, double y);
+	virtual void pickUp(Socrates* s);
+};
+
+class ExtraLifeGoodie : public Goodie
+{
+public:
+	ExtraLifeGoodie(StudentWorld* w, double x, double y);
+	virtual void pickUp(Socrates* s);
+};
+
+class Fungus : public Goodie
+{
+public:
+	Fungus(StudentWorld* w, double x, double y);
+	virtual void pickUp(Socrates* s);
+	virtual bool notFungus() const;
+};
+
+class Agent : public Actor
+{
+public:
+	Agent(StudentWorld* w, int imageID, double x, double y, int dir, int hitPoints);
+	virtual bool takeDamage(int damage);
+	virtual bool hasHitPoints() const;
+	int numHitPoints() const;
+	virtual void restoreHealth();
+	virtual int soundWhenHurt() const = 0;
+	virtual int soundWhenDie() const = 0;
+private:
+	int m_hitPoints; 
+	int maxPoints;
+};
+
+class Socrates : public Agent
+{
+public:
+	Socrates(StudentWorld* w, double x, double y);
+	virtual void doSomething();
+	virtual int soundWhenHurt() const;
+	virtual int soundWhenDie() const;
+	void addFlames();
+	int numFlames() const;
+	int numSprays() const;
+private:
 	int positionalAngle;
 	int flameCharges;
 	int sprayCharges;
 	int waitSpray;
 };
 
-class Dirt : public Actor {
+class Bacterium : public Agent
+{
 public:
-	Dirt(int imageID, double startX, double startY, Direction dir, int depth, StudentWorld* world, bool damageable);
-	void doSomething();
-};
-
-class Food : public Actor {
-public:
-	Food(int imageID, double startX, double startY, Direction dir, int depth, StudentWorld* world, bool damageable);
-	void doSomething();
-};
-
-class Projectile : public Actor {
-public:
-	Projectile(int imageID, double startX, double startY, Direction dir, int depth, StudentWorld* world, bool damageable);
-	void doSomething();
-	virtual bool maxDistance(int num) = 0;
+	Bacterium(StudentWorld* w, int imageID, double x, double y, int hitPoints);
+	virtual bool takeDamage(int damage);
+	virtual bool preventsLevelCompleting() const;
+	int getFood() const;
+	void changeFood(int num);
+	void duplicate();
+	virtual int getDamage() const = 0;
+	virtual Actor* newNew(double x, double y) = 0;
 private:
-	int travelDistance;
-};
-
-class Spray : public Projectile {
-public:
-	Spray(int imageID, double startX, double startY, Direction dir, int depth, StudentWorld* world, bool damageable);
-	bool maxDistance(int num);
-};
-
-class Flame :public Projectile {
-public:
-	Flame(int imageID, double startX, double startY, Direction dir, int depth, StudentWorld* world, bool damageable);
-	bool maxDistance(int num);
-};
-
-class Pit : public Actor {
-public:
-	Pit(int imageID, double startX, double startY, Direction dir, int depth, StudentWorld* world, bool damageable);
-	void doSomething();
-};
-
-class powerUp : public Actor {
-public:
-	powerUp(int imageID, double startX, double startY, Direction dir, int depth, 
-		StudentWorld* world, Socrates* player, bool damageable);
-	void doSomething();
-	bool playerHit();
-	virtual void effect(Socrates* player) = 0;
-private:
-	Socrates* m_player;
-	int ticksAlive;
-	int maxTicks;
-};
-
-class healthGoodie : public powerUp {
-public:
-	healthGoodie(int imageID, double startX, double startY, Direction dir, int depth,
-		StudentWorld* world, Socrates* player, bool damageable);
-	void effect(Socrates* player);
-
-};
-
-class flameGoodie : public powerUp {
-public:
-	flameGoodie(int imageID, double startX, double startY, Direction dir, int depth, 
-		StudentWorld* world, Socrates* player, bool damageable);
-	void effect(Socrates* player);
-};
-
-class lifeGoodie : public powerUp {
-public:
-	lifeGoodie(int imageID, double startX, double startY, Direction dir, int depth,
-		StudentWorld* world, Socrates* player, bool damageable);
-	void effect(Socrates* player);
-};
-
-class Fungus : public powerUp {
-public:
-	Fungus(int imageID, double startX, double startY, Direction dir, int depth,
-		StudentWorld* world, Socrates* player, bool damageable);
-	void effect(Socrates* player);
-};
-
-class Enemy : public Actor {
-public:
-	Enemy(int imageID, double startX, double startY, Direction dir, int depth, StudentWorld* world,
-		bool damageable, Socrates* player, int damage);
-	void doSomething();
-	virtual void duplicate(double x, double y) = 0;
-private:
-	int movePlanDistance;
 	int foodEaten;
-	Socrates* m_player;
-	int m_damage;
 };
 
-class RSalmonella : public Enemy {
+class EColi : public Bacterium
+{
 public:
-	RSalmonella(int imageID, double startX, double startY, Direction dir, int depth, StudentWorld* world,
-		bool damageable, Socrates* player, int damage);
-	void duplicate(double x, double y);
+	EColi(StudentWorld* w, double x, double y);
+	virtual void doSomething();
+	virtual int soundWhenHurt() const;
+	virtual int soundWhenDie() const;
+	Actor* newNew(double x, double y);
+	virtual int getDamage() const;
+}; 
+
+class Salmonella : public Bacterium
+{
+public:
+	Salmonella(StudentWorld* w, double x, double y, int hitPoints);
+	virtual void doSomething();
+	virtual int soundWhenHurt() const;
+	virtual int soundWhenDie() const;
+	int getPlanDist() const;
+	void changePlanDist(int num);
+	virtual bool aggression() const;
+	virtual void aggressiveMoves();
+	bool changeAggression(bool change);
+private:
+	int movementPlanDist;
+	bool beingAggressive;
 };
 
-#endif // ACTOR_H_
+class RegularSalmonella : public Salmonella
+{
+public:
+	RegularSalmonella(StudentWorld* w, double x, double y);
+	virtual int getDamage() const;
+	virtual Actor* newNew(double x, double y);
+};
+
+class AggressiveSalmonella : public Salmonella
+{
+public:
+	AggressiveSalmonella(StudentWorld* w, double x, double y);
+	virtual int getDamage() const;
+	virtual Actor* newNew(double x, double y);
+	virtual bool aggression() const;
+	virtual void aggressiveMoves();
+}; 
+
+#endif // ACTOR_INCLUDED

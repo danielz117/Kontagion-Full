@@ -1,35 +1,35 @@
-#ifndef STUDENTWORLD_H_
-#define STUDENTWORLD_H_
+#ifndef STUDENTWORLD_INCLUDED
+#define STUDENTWORLD_INCLUDED
 
 #include "GameWorld.h"
 #include <string>
-#include "Actor.h"
 #include <vector>
+#include "Actor.h"
 
-using namespace std;
-// Students:  Add code to this file, StudentWorld.cpp, Actor.h, and Actor.cpp
+class Actor;
+class Socrates;
 
 class StudentWorld : public GameWorld
 {
 public:
-    StudentWorld(std::string assetPath);
-	~StudentWorld();
-    virtual int init();
-    virtual int move();
-    virtual void cleanUp();
-	//bool blocked(Actor* a, Actor* b) const;
-	void addSpray(double startX, double startY, Direction dir);
-	void addFlame(double startX, double startY, Direction dir);
-	void addRSalmonella(double startX, double startY);
-	Actor* hitSomething(Projectile* p);
-
+	StudentWorld(std::string assetDir);
+	virtual ~StudentWorld();
+	virtual int init();
+	virtual int move();
+	virtual void cleanUp();
+	void addActor(Actor* a);
+	bool isBacteriumMovementBlockedAt(Actor* a) const;
+	Socrates* getOverlappingSocrates(Actor* a) const;
+	Actor* getOverlappingEdible(Actor* a) const;
+	bool getAngleToNearbySocrates(Actor* a, int dist, int& angle) const;
+	bool getAngleToNearestNearbyEdible(Actor* a, int dist, int& angle) const;
+	Actor* overlap(Actor* a);
+	
 private:
-	int points;
-	int level;
 	Socrates* player;
-	vector<Actor*> stuff;
-	bool withinBound(double x, double y) const;
+	std::vector<Actor*> stuff;
 	void validCoord(double& x, double& y, int size);
+	bool withinBound(double x, double y) const;
 };
 
-#endif // STUDENTWORLD_H_
+#endif // STUDENTWORLD_INCLUDED
